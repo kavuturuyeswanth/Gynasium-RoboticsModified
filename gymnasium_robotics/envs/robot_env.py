@@ -8,15 +8,6 @@ from gymnasium import error, logger, spaces
 from gymnasium_robotics.core import GoalEnv
 
 try:
-    import mujoco_py
-
-    from gymnasium_robotics.utils import mujoco_py_utils
-except ImportError as e:
-    MUJOCO_PY_IMPORT_ERROR = e
-else:
-    MUJOCO_PY_IMPORT_ERROR = None
-
-try:
     import mujoco
 
     from gymnasium_robotics.utils import mujoco_utils
@@ -27,6 +18,9 @@ else:
 
 DEFAULT_SIZE = 480
 
+def goal_distance(goal_a,goal_b):
+    assert goal_a.shape == goal_b.shape
+    return np.linalg.norm(goal_a - goal_b,axis = -1)
 
 class BaseRobotEnv(GoalEnv):
     """Superclass for all MuJoCo fetch and hand robotic environments."""
@@ -105,6 +99,10 @@ class BaseRobotEnv(GoalEnv):
     # ----------------------------
     def compute_terminated(self, achieved_goal, desired_goal, info):
         """All the available environments are currently continuing tasks and non-time dependent. The objective is to reach the goal for an indefinite period of time."""
+        dist_obj2goal = goal_distance(achieved_goal, desired_goal)
+
+        if dist_obj2goal < 0.05:
+            return True
         return False
 
     def compute_truncated(self, achievec_goal, desired_goal, info):
@@ -175,6 +173,8 @@ class BaseRobotEnv(GoalEnv):
                 the ``info`` returned by :meth:`step`.
         """
         super().reset(seed=seed)
+        self.ep_id +=1
+        print("episode id: ",self.ep_id)
         did_reset_sim = False
         while not did_reset_sim:
             did_reset_sim = self._reset_sim()
@@ -289,7 +289,7 @@ class MujocoRobotEnv(BaseRobotEnv):
         self.model = self._mujoco.MjModel.from_xml_path(self.fullpath)
         self.data = self._mujoco.MjData(self.model)
         self._model_names = self._utils.MujocoModelNames(self.model)
-
+        self.ep_id = 0
         self.model.vis.global_.offwidth = self.width
         self.model.vis.global_.offheight = self.height
 

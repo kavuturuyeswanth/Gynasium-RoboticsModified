@@ -66,7 +66,7 @@ def get_base_fetch_env(RobotEnvClass: Union[MujocoPyRobotEnv, MujocoRobotEnv]):
             self.distance_threshold = distance_threshold
             self.reward_type = reward_type
 
-            super().__init__(n_actions=4, **kwargs)
+            super().__init__(n_actions=6, **kwargs)
 
         # GoalEnv methods
         # ----------------------------
@@ -83,19 +83,15 @@ def get_base_fetch_env(RobotEnvClass: Union[MujocoPyRobotEnv, MujocoRobotEnv]):
         # ----------------------------
 
         def _set_action(self, action):
-            assert action.shape == (4,)
+            assert action.shape == (6,)
             action = (
                 action.copy()
             )  # ensure that we don't change the action outside of this scope
             pos_ctrl, gripper_ctrl = action[:3], action[3]
 
             pos_ctrl *= 0.05  # limit maximum change in position
-            rot_ctrl = [
-                1.0,
-                0.0,
-                1.0,
-                0.0,
-            ]  # fixed rotation of the end effector, expressed as a quaternion
+            #rot_ctrl = [1.0, 0.0, 1.0, 0.0,]  # fixed rotation of the end effector, expressed as a quaternion
+            rot_ctrl = [0., action[4], 0., -action[4]]
             gripper_ctrl = np.array([gripper_ctrl, gripper_ctrl])
             assert gripper_ctrl.shape == (2,)
             if self.block_gripper:
@@ -152,17 +148,16 @@ def get_base_fetch_env(RobotEnvClass: Union[MujocoPyRobotEnv, MujocoRobotEnv]):
 
         def _sample_goal(self):
             if self.has_object:
-                goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(
-                    -self.target_range, self.target_range, size=3
-                )
+                #goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(-self.target_range, self.target_range, size=3)
+                goal = self.initial_gripper_xpos[:3]+ [0.05816532, 0.00287504,0.04996897]
                 goal += self.target_offset
                 goal[2] = self.height_offset
-                if self.target_in_the_air and self.np_random.uniform() < 0.5:
-                    goal[2] += self.np_random.uniform(0, 0.45)
-            else:
-                goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(
-                    -self.target_range, self.target_range, size=3
-                )
+                #if self.target_in_the_air and self.np_random.uniform() < 0.5:
+                if self.target_in_the_air:
+                    #goal[2] += self.np_random.uniform(0, 0.45)
+                    goal[2] += 0.25
+            #else:
+                #goal = self.initial_gripper_xpos[:3] + self.np_random.uniform(-self.target_range, self.target_range, size=3)
             return goal.copy()
 
         def _is_success(self, achieved_goal, desired_goal):
@@ -383,12 +378,8 @@ class MujocoFetchEnv(get_base_fetch_env(MujocoRobotEnv)):
         if self.has_object:
             object_xpos = self.initial_gripper_xpos[:2]
             while np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2]) < 0.1:
-                object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(
-                    -self.obj_range, self.obj_range, size=2
-                )
-            object_qpos = self._utils.get_joint_qpos(
-                self.model, self.data, "object0:joint"
-            )
+               object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
+            object_qpos = self._utils.get_joint_qpos(self.model, self.data, "object0:joint") + [0.,0.,0.,0.,0.,0.,self.np_random.uniform(0,0.15)]
             assert object_qpos.shape == (7,)
             object_qpos[:2] = object_xpos
             self._utils.set_joint_qpos(
