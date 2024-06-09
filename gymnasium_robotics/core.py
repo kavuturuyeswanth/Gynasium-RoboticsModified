@@ -18,8 +18,7 @@ class GoalEnv(gym.Env):
     - :meth:`compute_truncated` - Returns boolean truncation depending on the achieved and desired goal, as well as extra information.
     """
 
-    def reset(
-        self,
+    def reset(self,
         *,
         seed: Optional[int] = None,
         options: Optional[dict] = None,
