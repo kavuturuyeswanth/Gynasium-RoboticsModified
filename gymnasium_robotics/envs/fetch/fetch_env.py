@@ -153,7 +153,6 @@ def get_base_fetch_env(RobotEnvClass: MujocoRobotEnv):
                 goal += self.target_offset
                 goal[2] = self.height_offset
                 if self.target_in_the_air and self.np_random.uniform() < 0.5:
-                if self.target_in_the_air:
                     goal[2] += self.np_random.uniform(0, 0.15)
                     #goal[2] += 0.25
             else:
