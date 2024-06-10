@@ -16,8 +16,7 @@ def register_robotics_envs():
     for reward_type in ["sparse", "dense"]:
         suffix = "Dense" if reward_type == "dense" else ""
         kwargs = {
-            "reward_type": reward_type,
-            "render_mode": "human"
+            "reward_type": reward_type
         }
 
         # Fetch
