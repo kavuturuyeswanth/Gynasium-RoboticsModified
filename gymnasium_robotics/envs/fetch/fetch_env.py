@@ -262,7 +262,7 @@ class MujocoFetchEnv(get_base_fetch_env(MujocoRobotEnv)):
             object_xpos = self.initial_gripper_xpos[:2]
             while np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2]) < 0.1:
                object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
-            object_qpos = self._utils.get_joint_qpos(self.model, self.data, "object0:joint") + [0.,0.,0.,0.,0.,0.,self.np_random.uniform(0,0.15)]
+            object_qpos = self._utils.get_joint_qpos(self.model, self.data, "object0:joint")
             assert object_qpos.shape == (7,)
             object_qpos[:2] = object_xpos
             self._utils.set_joint_qpos(
