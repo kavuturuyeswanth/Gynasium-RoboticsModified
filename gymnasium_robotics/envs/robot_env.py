@@ -179,7 +179,7 @@ class BaseRobotEnv(GoalEnv):
         """
         super().reset(seed=seed)
         self.ep_id +=1
-        print("episode id: ",self.ep_id)
+        #print("episode id: ",self.ep_id)
         did_reset_sim = False
         while not did_reset_sim:
             did_reset_sim = self._reset_sim()
