@@ -99,6 +99,7 @@ class BaseRobotEnv(GoalEnv):
     # ----------------------------
     def compute_terminated(self, achieved_goal, desired_goal, info):
         """All the available environments are currently continuing tasks and non-time dependent. The objective is to reach the goal for an indefinite period of time."""
+        return False
         dist_obj2goal = goal_distance(achieved_goal, desired_goal)
 
         if dist_obj2goal < 0.05:
